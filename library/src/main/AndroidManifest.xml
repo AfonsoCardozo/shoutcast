@@ -1,0 +1,21 @@
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.pits.library.radio">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name">
+
+        <service android:name="com.pits.library.radio.RadioPlayerService" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.pits.library.radio.radio.INTENT_PLAYPAUSE"/>
+                <action android:name="com.pits.library.radio.radio.INTENT_OPENPLAYER"/>
+                <action android:name="com.pits.library.radio.radio.INTENT_CANCEL"/>
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
