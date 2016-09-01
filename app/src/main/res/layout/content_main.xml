@@ -2,9 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="MainActivity"
     android:layout_marginTop="?attr/actionBarSize"
@@ -32,10 +29,12 @@
 
     <ImageView
         android:id="@+id/art_image"
-        android:src="@mipmap/album"
+        android:minHeight="250dp"
+        android:minWidth="180dp"
+        android:maxWidth="150dp"
+        android:maxHeight="250dp"
         android:layout_below="@+id/description_title"
-        android:minHeight="200dp"
-        android:minWidth="200dp"
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -44,12 +43,12 @@
         android:layout_below="@+id/art_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
         android:textStyle="italic"
         android:id="@+id/song_name"
         android:text="Song title  -:- More details here"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="5dp" />
 
     <LinearLayout
         android:id="@+id/channels_layout"
@@ -61,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="6">
+        android:weightSum="5">
 
         <Button
             android:id="@+id/channel_one"
@@ -72,7 +71,7 @@
             android:padding="2dp"
             android:text="@string/channel_1"
             android:layout_height="wrap_content"
-            android:layout_weight="1.5"/>
+            android:layout_weight="1"/>
         <View
             android:layout_width="1dp"
             android:layout_marginTop="2dp"
@@ -89,7 +88,7 @@
             android:padding="2dp"
             android:text="@string/channel_2"
             android:layout_height="wrap_content"
-            android:layout_weight="1.5"/>
+            android:layout_weight="1"/>
         <View
             android:layout_width="1dp"
             android:layout_marginTop="2dp"
@@ -106,7 +105,7 @@
             android:padding="2dp"
             android:text="@string/channel_3"
             android:layout_height="wrap_content"
-            android:layout_weight="1.5"/>
+            android:layout_weight="1"/>
         <View
             android:layout_width="1dp"
             android:layout_marginTop="2dp"
@@ -123,13 +122,31 @@
             android:padding="2dp"
             android:text="@string/channel_4"
             android:layout_height="wrap_content"
-            android:layout_weight="1.5"/>
+            android:layout_weight="1"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"/>
+
+        <Button
+            android:id="@+id/channel_five"
+            android:layout_width="0dp"
+            android:textSize="10sp"
+            android:background="@drawable/channel_button_effect"
+            android:textColor="@android:color/white"
+            android:padding="2dp"
+            android:text="@string/channel_5"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
     </LinearLayout>
 
     <Button
         android:id="@+id/button"
         android:background="@mipmap/play"
         android:padding="2dp"
+        android:layout_margin="4dp"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_below="@+id/channels_layout"
@@ -138,12 +155,11 @@
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"
-        android:layout_below="@id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         ads:adSize="BANNER"
-        ads:adUnitId="@string/banner_ad_unit_id" />
+        ads:adUnitId="@string/banner_ad_unit_id"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

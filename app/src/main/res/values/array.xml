@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="channels_array">
+        <item>http://108.178.53.106:6100</item>
+        <item>http://108.178.53.106:6200</item>
+        <item>http://108.178.53.106:6300</item>
+        <item>http://108.178.53.106:6400</item>
+        <item>http://108.178.53.106:5000</item>
+    </string-array>
+</resources>

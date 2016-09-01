@@ -1,10 +1,11 @@
 <resources>
-    <string name="app_name">Shout cast</string>
+    <string name="app_name">ShoutCast</string>
     <string name="action_settings">Settings</string>
     <string name="channel_1">channel 1</string>
     <string name="channel_2">channel 2</string>
     <string name="channel_3">channel 3</string>
     <string name="channel_4">channel 4</string>
+    <string name="channel_5">channel 5</string>
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 
 </resources>

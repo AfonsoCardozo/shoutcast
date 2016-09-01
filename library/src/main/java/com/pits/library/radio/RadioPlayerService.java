@@ -320,7 +320,11 @@ public class RadioPlayerService extends Service implements PlayerCallback {
     @Override
     public void playerMetadata(String s, String s2) {
         notifyMetaDataChanged(s, s2);
-        notifyRadioTitle(s2);
+        if (s != null) {
+            if (s.equals("StreamTitle")) {
+                notifyRadioTitle(s2);
+            }
+        }
 
     }
 
