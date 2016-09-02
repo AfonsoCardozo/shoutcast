@@ -1,15 +1,21 @@
 package com.byteshaft.shoutcast;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,7 +37,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements RadioListener, View.OnClickListener, HttpRequest.OnReadyStateChangeListener {
 
     private RadioManager mRadioManager;
-    private Button button;
+    private ImageButton button;
     private String streamUrl = "http://108.178.53.106:6100";
     private List<String> channelsList;
     private Button channelOne;
@@ -50,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(getResources().getColor(android.R.color.black));
         setSupportActionBar(toolbar);
+        button = (ImageButton) findViewById(R.id.button);
         channelOne = (Button) findViewById(R.id.channel_one);
         channelTwo = (Button) findViewById(R.id.channel_two);
         channelThree = (Button) findViewById(R.id.channel_three);
@@ -63,12 +70,10 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         channelFour.setOnClickListener(this);
         channelFive.setOnClickListener(this);;
         channelsList = Arrays.asList(getResources().getStringArray(R.array.channels_array));
-        Log.e("TAG", String.valueOf(channelsList));
         AdView adView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder()
                 .setRequestAgent("android_studio:ad_template").build();
         adView.loadAd(adRequest);
-        button = (Button) findViewById(R.id.button);
         mRadioManager = RadioManager.with(this, MainActivity.class);
         mRadioManager.registerListener(this);
         mRadioManager.setLogging(true);
@@ -87,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         });
         channelsButton = new Button[] {channelOne, channelTwo,
                 channelThree, channelFour, channelFive};
+        TelephonyManager telephonyManager = Helpers.getTelephonyManager();
+        telephonyManager.listen(mCallStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
+        registerReceiver(mOutGoingCallListener, intentFilter);
     }
 
     @Override
@@ -108,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                AppGlobals.setSongPlaying(true);
                 button.setBackgroundResource(R.mipmap.pause);
             }
         });
@@ -119,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                AppGlobals.setSongPlaying(false);
                 button.setBackgroundResource(R.mipmap.play);
             }
         });
@@ -144,15 +155,21 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
                 songTitle.setText(title);
                 if (title.contains(":.:")) {
                     String[] split = title.split(":.:");
-                    Log.i("TAG", String.valueOf(split));
                     String artist = split[0];
                     String songTitle = split[1];
+                    Log.e("TAGIMAGE", songTitle);
                     getImageForTitle(songTitle);
                 } else if (title.contains("-|-")) {
-                    String[] split = title.split("-|-");
-                    Log.i("TAG", String.valueOf(split));
+                    String[] split = title.split("\\|");
+                    String artist = split[0];
+                    String songTitle = split[1].replaceAll("-", "");
+                    Log.e("TAGIMAGE", songTitle);
+                    getImageForTitle(songTitle);
+                } else if (title.contains("-:-")) {
+                    String[] split = title.split("-:-");
                     String artist = split[0];
                     String songTitle = split[1];
+                    Log.e("TAGIMAGE", songTitle);
                     getImageForTitle(songTitle);
                 }
             }
@@ -189,6 +206,8 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
 
     @Override
     public void onClick(View view) {
+        imageArt.setBackground(getResources()
+                .getDrawable(R.drawable.image_art_placeholder));
         switch (view.getId()) {
             case R.id.channel_one:
                 mRadioManager.stopRadio();
@@ -245,8 +264,8 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
     private void getImageForTitle(String title) {
         HttpRequest request = new HttpRequest(getApplicationContext());
         request.setOnReadyStateChangeListener(this);
-        request.open("POST",
-                String.format("https://itunes.apple.com/search?term='%s'&media=music&limit=1", title));
+        String url = String.format("https://itunes.apple.com/search?term=%s&media=music&limit=1", title);
+        request.open("GET", url.replaceAll(" ", "%20"));
         request.send();
     }
 
@@ -262,10 +281,17 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
                         if (!response.trim().isEmpty() && response != null) {
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
-                                JSONArray jsonArray = jsonObject.getJSONArray("results");
-                                JSONObject songDetails = jsonArray.getJSONObject(0);
-                                String imageUrl = songDetails.getString("artworkUrl100").replaceAll("100", "450");
-                                Log.i("TAG", "Image "+ imageUrl);
+                                if (jsonObject.getInt("resultCount") > 0) {
+                                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                                    JSONObject songDetails = jsonArray.getJSONObject(0);
+                                    String imageUrl = songDetails.getString("artworkUrl100")
+                                            .replaceAll("100", "450");
+                                    Log.e("TAG", "Image " + imageUrl);
+                                    new SetImageArt().execute(imageUrl);
+                                } else {
+                                    imageArt.setBackground(getResources()
+                                            .getDrawable(R.drawable.image_art_placeholder));
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -285,17 +311,55 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
 
         @Override
         protected BitmapDrawable doInBackground(String... strings) {
-            Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    R.mipmap.album);
-            Bitmap blurredBitmap = BlurBuilder.blur(getApplicationContext(),icon);
-
-            return new BitmapDrawable( getResources(), blurredBitmap);
+            Bitmap bitmap = Helpers.downloadImage(strings[0]);
+            Bitmap blurredBitmap = null;
+            if (bitmap != null) {
+                blurredBitmap = BlurBuilder.blur(getApplicationContext(), bitmap);
+            }
+            return new BitmapDrawable(bitmap);
         }
 
         @Override
         protected void onPostExecute(BitmapDrawable bitmapDrawable) {
             super.onPostExecute(bitmapDrawable);
-            imageArt.setBackground(bitmapDrawable);
+            if (bitmapDrawable != null) {
+                imageArt.setBackground(null);
+                imageArt.setBackground(bitmapDrawable);
+            } else {
+                imageArt.setBackground(getResources()
+                        .getDrawable(R.drawable.image_art_placeholder));
+            }
         }
     }
+
+    private PhoneStateListener mCallStateListener = new PhoneStateListener() {
+        boolean songWasOn = false;
+
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            super.onCallStateChanged(state, incomingNumber);
+            switch (state) {
+                case TelephonyManager.CALL_STATE_RINGING:
+                    if (AppGlobals.getSongStatus()) {
+                        mRadioManager.stopRadio();
+                        songWasOn = true;
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_IDLE:
+                    if (songWasOn) {
+                        mRadioManager.startRadio(streamUrl);
+                    }
+                    break;
+            }
+        }
+    };
+
+    private BroadcastReceiver mOutGoingCallListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AppGlobals.getSongStatus()) {
+                mRadioManager.stopRadio();
+            }
+        }
+    };
 }

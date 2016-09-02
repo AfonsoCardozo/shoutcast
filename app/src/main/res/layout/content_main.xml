@@ -33,18 +33,23 @@
         android:minWidth="180dp"
         android:maxWidth="150dp"
         android:maxHeight="250dp"
+        android:background="@drawable/image_art_placeholder"
         android:layout_below="@+id/description_title"
+        android:layout_above="@+id/song_name"
         android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:layout_centerInParent="true"
-        android:layout_below="@+id/art_image"
-        android:layout_width="wrap_content"
+        android:layout_above="@+id/channels_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="center_horizontal"
         android:textStyle="italic"
         android:id="@+id/song_name"
         android:text="Song title  -:- More details here"
@@ -52,7 +57,7 @@
 
     <LinearLayout
         android:id="@+id/channels_layout"
-        android:layout_below="@+id/song_name"
+        android:layout_above="@+id/button"
         android:padding="2dp"
         android:layout_margin="5dp"
         android:layout_marginLeft="5dp"
@@ -142,14 +147,14 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
-    <Button
+    <ImageButton
         android:id="@+id/button"
         android:background="@mipmap/play"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="55dp"
         android:padding="2dp"
-        android:layout_margin="4dp"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_below="@+id/channels_layout"
         android:layout_toLeftOf="@+id/top_title"
         android:layout_toStartOf="@+id/top_title"/>
 
