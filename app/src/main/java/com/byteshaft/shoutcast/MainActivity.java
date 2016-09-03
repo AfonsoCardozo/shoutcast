@@ -6,17 +6,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.byteshaft.requests.HttpRequest;
@@ -48,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
     private Button[] channelsButton;
     private ImageView imageArt;
     private TextView songTitle;
+    private SeekBar mSeekBarVolume;
+    private AudioManager audioManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         channelFive = (Button) findViewById(R.id.channel_five);
         imageArt = (ImageView) findViewById(R.id.art_image);
         songTitle = (TextView) findViewById(R.id.song_name);
+        mSeekBarVolume = (SeekBar) findViewById(R.id.sound_seek_bar);
         channelOne.setOnClickListener(this);
         channelTwo.setOnClickListener(this);
         channelThree.setOnClickListener(this);
@@ -96,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         telephonyManager.listen(mCallStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
         registerReceiver(mOutGoingCallListener, intentFilter);
+        initControls();
     }
 
     @Override
@@ -125,6 +132,11 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
     }
 
     @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    @Override
     public void onRadioStopped() {
         runOnUiThread(new Runnable() {
             @Override
@@ -148,11 +160,11 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
 
     @Override
     public void songInfo(final String title) {
-        Log.i("TAG", title);
+        Log.e("TAG", title);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                songTitle.setText(title);
+                songTitle.setText(Html.fromHtml(title));
                 if (title.contains(":.:")) {
                     String[] split = title.split(":.:");
                     String artist = split[0];
@@ -314,9 +326,9 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
             Bitmap bitmap = Helpers.downloadImage(strings[0]);
             Bitmap blurredBitmap = null;
             if (bitmap != null) {
-                blurredBitmap = BlurBuilder.blur(getApplicationContext(), bitmap);
+                    blurredBitmap = BlurBuilder.blur(getApplicationContext(), bitmap);
             }
-            return new BitmapDrawable(bitmap);
+            return new BitmapDrawable(blurredBitmap);
         }
 
         @Override
@@ -362,4 +374,40 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
             }
         }
     };
+
+    private void initControls() {
+        try
+        {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            mSeekBarVolume.setMax(audioManager
+                    .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            mSeekBarVolume.setProgress(audioManager
+                    .getStreamVolume(AudioManager.STREAM_MUSIC));
+
+
+            mSeekBarVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+            {
+                @Override
+                public void onStopTrackingTouch(SeekBar arg0)
+                {
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar arg0)
+                {
+                }
+
+                @Override
+                public void onProgressChanged(SeekBar arg0, int progress, boolean arg2)
+                {
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                            progress, 0);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
