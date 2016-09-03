@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -125,6 +126,11 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
     }
 
     @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    @Override
     public void onRadioStopped() {
         runOnUiThread(new Runnable() {
             @Override
@@ -148,11 +154,11 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
 
     @Override
     public void songInfo(final String title) {
-        Log.i("TAG", title);
+        Log.e("TAG", title);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                songTitle.setText(title);
+                songTitle.setText(Html.fromHtml(title));
                 if (title.contains(":.:")) {
                     String[] split = title.split(":.:");
                     String artist = split[0];
