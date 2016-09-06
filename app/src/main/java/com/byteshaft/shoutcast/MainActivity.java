@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
@@ -35,6 +36,7 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements RadioListener, View.OnClickListener, HttpRequest.OnReadyStateChangeListener {
@@ -103,6 +105,18 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
         registerReceiver(mOutGoingCallListener, intentFilter);
         initControls();
+
+        // set locale
+        setLocale();
+    }
+
+    private void setLocale() {
+        Locale locale = new Locale("es");
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
     }
 
     @Override
@@ -191,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
     @Override
     protected void onResume() {
         super.onResume();
+        setLocale();
         int index = channelsList.indexOf(streamUrl);
         switch (index) {
             case 0:
