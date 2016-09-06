@@ -39,7 +39,7 @@ public class StreamLinkDecoder extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         try {
             URL website = new URL(streamUrl);
-            URLConnection connection = null;
+            URLConnection connection;
             connection = website.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             response = new StringBuilder();
