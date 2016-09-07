@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -178,25 +177,25 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                songTitle.setText(Html.fromHtml(title));
+                songTitle.setText(title.replaceAll("�", ""));
                 if (title.contains(":.:")) {
                     String[] split = title.split(":.:");
                     String artist = split[0];
                     String songTitle = split[1];
                     Log.e("TAGIMAGE", songTitle);
-                    getImageForTitle(songTitle);
+                    getImageForTitle(artist, songTitle);
                 } else if (title.contains("-|-")) {
                     String[] split = title.split("\\|");
-                    String artist = split[0];
+                    String artist = split[0].replaceAll("-", "");
                     String songTitle = split[1].replaceAll("-", "");
                     Log.e("TAGIMAGE", songTitle);
-                    getImageForTitle(songTitle);
+                    getImageForTitle(artist, songTitle);
                 } else if (title.contains("-:-")) {
                     String[] split = title.split("-:-");
-                    String artist = split[0];
-                    String songTitle = split[1];
+                    String artist = split[0].replaceAll("-", "");;
+                    String songTitle = split[1].replaceAll("-", "");
                     Log.e("TAGIMAGE", songTitle);
-                    getImageForTitle(songTitle);
+                    getImageForTitle(artist, songTitle);
                 }
             }
         });
@@ -288,11 +287,15 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
         }
     }
 
-    private void getImageForTitle(String title) {
+    private void getImageForTitle(String artist , String songTitle) {
         HttpRequest request = new HttpRequest(getApplicationContext());
         request.setOnReadyStateChangeListener(this);
-        String url = String.format("https://itunes.apple.com/search?term=%s&media=music&limit=1", title);
-        request.open("GET", url.replaceAll(" ", "%20"));
+        String query = artist + "-" + songTitle;
+        query = query.replaceAll("\\(", "");
+        query = query.replaceAll("\\)", "");
+        String url = String.format("https://itunes.apple.com/search?term=%s&media=music&limit=1", query).replaceAll(" ", "%20").replaceAll("�", "");
+        Log.i("TAG", url);
+        request.open("GET", url);
         request.send();
     }
 
@@ -308,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements RadioListener, Vi
                         if (!response.trim().isEmpty() && response != null) {
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
-                                if (jsonObject.getInt("resultCount") > 0) {
+                                if (jsonObject.getInt("resultCount") != 0) {
                                     JSONArray jsonArray = jsonObject.getJSONArray("results");
                                     JSONObject songDetails = jsonArray.getJSONObject(0);
                                     String imageUrl = songDetails.getString("artworkUrl100")
